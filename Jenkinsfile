@@ -119,6 +119,7 @@ stage('run-unit-tests'){
 			sh '''
 	pwd
 	cd server
+	./copy-frontend-assets.sh
         pwd 
 	cd ../frontend		
 	pwd        
@@ -127,7 +128,7 @@ stage('run-unit-tests'){
 	 npm run undoAllSeed	
 	 npm run migrate	
 	 npm run seed		 
-	 
+	 sudo npm run coverage --silent
 	'''
 
     sh '''
@@ -222,41 +223,7 @@ sh '''
    }  
 
 
-stage('run-e2e'){
-        steps {
-            script {	            
-sh '''
-      curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: run-e2e", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
-      '''
-		    
-	sh '''
-		pwd
-		cd server
-        	pwd 
-		cd ../frontend/node_modules/protractor
-		npm i webdriver-manager@latest
-		cd ../..
-		npm i typescript@3.1.6 --save-dev --save-exact
-		cd ..
-	'''			
 
-  sh '''
-      curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "success","context":"ci/jenkins: run-e2e", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests passed on Jenkins!"}'
-      '''    
-		        RUN_E2E_STATUS= 'Success'
-            }
-    }
-	post {
-                failure {
-                       script {
-        		RUN_E2E_STATUS= 'Failed'
-sh '''
-      curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "failure","context":"ci/jenkins: run-e2e", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests failed on Jenkins!"}'
-      '''      
-    		}
-                }
-            }	
-   }  
 
 stage('run pa11y'){
     steps {
@@ -288,6 +255,43 @@ sh '''
 	  }
       }
       }
+	 
+stage('run-e2e'){
+        steps {
+            script {
+sh '''
+      curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: run-e2e", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
+      '''
+
+	sh '''
+		pwd
+		cd server
+		./copy-frontend-assets.sh
+        	pwd
+		cd ../frontend/node_modules/protractor
+		npm i webdriver-manager@latest
+		cd ../..
+		npm i typescript@3.1.6 --save-dev --save-exact
+		cd ..	
+	'''
+
+  sh '''
+      curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "success","context":"ci/jenkins: run-e2e", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests passed on Jenkins!"}'
+      '''
+		        RUN_E2E_STATUS= 'Success'
+            }
+    }
+	post {
+                failure {
+                       script {
+        		RUN_E2E_STATUS= 'Failed'
+sh '''
+      curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "failure","context":"ci/jenkins: run-e2e", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests failed on Jenkins!"}'
+      '''
+    		}
+                }
+            }
+   }	
 	 
  stage('dev-deploy'){
     steps {
