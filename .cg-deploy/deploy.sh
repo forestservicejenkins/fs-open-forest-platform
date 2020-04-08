@@ -39,7 +39,7 @@ echo "Unknown space: $SPACE"
 exit
 fi
 
-cf login -a $API -u $CF_USERNAME -p $CF_PASSWORD -o $ORG -s $SPACE
+cf login -a api.fr.cloud.gov -u 66b04086-2ae0-4580-8394-bcd15fa20169 -p yJ6l.vdcq0dSG6Bxz0Pt4jneCNM-HznW -o usda-forest-service -s platform-staging
 
 # Remove venerable applications
 cf apps |
