@@ -16,7 +16,8 @@ pipeline {
         GITHUB_TOKEN = credentials('GITHUB_TOKEN')
         GITHUB_PROJECT_NAME = "USDAForestService/fs-open-forest-platform"
         SONAR_PROJECT_NAME = "fs-openforest-platform"
-        MAILING_LIST = 'ikumarasamy@techtrend.us,matthew.reiss@usda.gov,abdul.qureshi@usda.gov,SM.FS.OpenFrstOps@usda.gov,michael.laney@usda.gov,Brian.Davidson2@usda.gov,Dylan.Mcafee@usda.gov,Rebekah.Hernandez@usda.gov,jonathan.lerner@usda.gov,shadat.mahmud@usda.gov,bdavidson@cynerge.com'
+        //MAILING_LIST = 'ikumarasamy@techtrend.us,matthew.reiss@usda.gov,abdul.qureshi@usda.gov,SM.FS.OpenFrstOps@usda.gov,michael.laney@usda.gov,Brian.Davidson2@usda.gov,Dylan.Mcafee@usda.gov,Rebekah.Hernandez@usda.gov,jonathan.lerner@usda.gov,shadat.mahmud@usda.gov,bdavidson@cynerge.com'
+	    MAILING_LIST = 'ikumarasamy@techtrend.us'
 
 	CHECKOUT_STATUS = 'Pending'
         INSTALL_DEPENDENCIES_STATUS= 'Pending'
@@ -29,8 +30,10 @@ pipeline {
 	AUTHOR = 'kilara77'
 	BASIC_AUTH_PASS=credentials('BASIC_AUTH_PASS')
 	BASIC_AUTH_USER=credentials('BASIC_AUTH_USER')
-	CF_USERNAME = credentials('CF_USERNAME')
-        CF_PASSWORD = credentials('CF_PASSWORD')
+	CF_USERNAME_DEV = credentials('CF_USERNAME_DEV')
+        CF_PASSWORD_DEV = credentials('CF_PASSWORD_DEV')
+        CF_USERNAME_STAGING = credentials('CF_USERNAME_STAGING')
+        CF_PASSWORD_STAGING = credentials('CF_PASSWORD_STAGING')
         JENKINS_URL="https://jenkins.fedgovcloud.us"
         SONARQUBE_URL="https://sca.fedgovcloud.us/dashboard?id=fs-openforest-platform"
     }
@@ -73,15 +76,9 @@ pipeline {
       curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: install-dependencies", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
       '''
 		    sh '''
-	pwd
 	cd frontend
-	pwd
-	rm package-lock.json && rm -rf node_modules && rm -rf ~/.node-gyp
 	npm install
-	npm i typescript@3.1.6 --save-dev --save-exact
 	cd ../server
-	pwd
-	rm package-lock.json && rm -rf node_modules && rm -rf ~/.node-gyp
 	npm install
 	'''
       sh '''
@@ -115,17 +112,15 @@ stage('run-unit-tests'){
       curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: run-unit-tests", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
       '''
 			sh '''
-	pwd
 	cd server
 	./copy-frontend-assets.sh
-        pwd
 	cd ../frontend
-	pwd
 	npm run test:ci
         cd ../server
 	 npm run undoAllSeed
 	 npm run migrate
 	 npm run seed
+	 npm run coverage --silent
 	'''
 
     sh '''
@@ -157,7 +152,6 @@ sh '''
       curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: run-lint", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
       '''
 		   sh '''
-	    pwd
 	    cd frontend
 	    npm run lint
 	    cd ../server
@@ -258,10 +252,8 @@ sh '''
       '''
 
 	sh '''
-		pwd
 		cd server
-		./copy-frontend-assets.sh
-        	pwd
+		./copy-frontend-assets.sh        	
 		cd ../frontend/node_modules/protractor
 		npm i webdriver-manager@latest
 		cd ../..
@@ -294,8 +286,9 @@ sh '''
       		curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: build-deploy", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
       	'''
 	sh '''
-	pwd
 	chmod 765 deploy.sh
+	export CF_USERNAME = ${CF_USERNAME_STAGING}
+	export CF_PASSWORD = ${CF_PASSWORD_STAGING}
 	./deploy.sh ${WORKSPACE}
 	'''
 	sh '''
