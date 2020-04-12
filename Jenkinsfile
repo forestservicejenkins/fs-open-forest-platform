@@ -287,8 +287,6 @@ sh '''
       	'''
 	sh '''
 	chmod 765 deploy.sh
-	export CF_USERNAME = '${CF_USERNAME_STAGING}'
-	export CF_PASSWORD = '${CF_PASSWORD_STAGING}'
 	./deploy.sh ${WORKSPACE}
 	'''
 	sh '''
