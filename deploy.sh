@@ -1,5 +1,7 @@
 #!/bin/bash
-echo "Workspace url echo $1"
+echo "Workspace url $1"
+echo "platform: $2"
+
 cd "$1"
 pwd
         source /home/Jenkins/openforest.sh
@@ -19,4 +21,4 @@ pwd
         sudo chown -R Jenkins:Jenkins ../server
         cd ..
         pwd
-        ./.cg-deploy/deploy.sh platform-staging
+        ./.cg-deploy/deploy.sh $2
