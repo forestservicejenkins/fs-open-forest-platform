@@ -287,12 +287,12 @@ sh '''
       	'''
 	sh '''
 	chmod 765 deploy.sh
-	export CF_USERNAME = ${CF_USERNAME_STAGING}
-	export CF_PASSWORD = ${CF_PASSWORD_STAGING}
+	export CF_USERNAME = '${CF_USERNAME_STAGING}'
+	export CF_PASSWORD = '${CF_PASSWORD_STAGING}'
 	./deploy.sh ${WORKSPACE}
 	'''
 	sh '''
-      		curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "success","context":"ci/jenkins: build-deploy", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests passed on Jenkins!"}'
+     	   curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "success","context":"ci/jenkins: build-deploy", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests passed on Jenkins!"}'
       	'''
         DEPLOY_STATUS= 'Success'
         }
