@@ -18,7 +18,6 @@ pipeline {
         SONAR_PROJECT_NAME = "fs-openforest-platform"
         MAILING_LIST = 'ikumarasamy@techtrend.us,matthew.reiss@usda.gov,abdul.qureshi@usda.gov,SM.FS.OpenFrstOps@usda.gov,michael.laney@usda.gov,Brian.Davidson2@usda.gov,Dylan.Mcafee@usda.gov,Rebekah.Hernandez@usda.gov,jonathan.lerner@usda.gov,shadat.mahmud@usda.gov,bdavidson@cynerge.com'
 
-
 	CHECKOUT_STATUS = 'Pending'
         INSTALL_DEPENDENCIES_STATUS= 'Pending'
 	RUN_LINT_STATUS = 'Pending'
@@ -30,8 +29,6 @@ pipeline {
 	AUTHOR = 'kilara77'	
 	BASIC_AUTH_PASS=credentials('BASIC_AUTH_PASS')
 	BASIC_AUTH_USER=credentials('BASIC_AUTH_USER')
-	CF_USERNAME = credentials('CF_USERNAME')
-        CF_PASSWORD = credentials('CF_PASSWORD')	    
         JENKINS_URL="https://jenkins.fedgovcloud.us"
         SONARQUBE_URL="https://sca.fedgovcloud.us/dashboard?id=fs-openforest-platform"        
     }
@@ -40,7 +37,7 @@ pipeline {
         timestamps()
         disableConcurrentBuilds()
         ansiColor('xterm')
-     //   buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(logRotator(numToKeepStr: '50'))
     }  
 
  stages { 
@@ -75,15 +72,9 @@ pipeline {
       curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: install-dependencies", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
       '''					    
 		    sh '''
-	pwd
 	cd frontend
-	pwd
-	rm package-lock.json && rm -rf node_modules && rm -rf ~/.node-gyp
 	npm install	
-	npm i typescript@3.1.6 --save-dev --save-exact
 	cd ../server
-	pwd
-	rm package-lock.json && rm -rf node_modules && rm -rf ~/.node-gyp
 	npm install		
 	'''	
       sh '''
@@ -117,17 +108,15 @@ stage('run-unit-tests'){
       curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: run-unit-tests", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
       '''		
 			sh '''
-	pwd
 	cd server
 	./copy-frontend-assets.sh
-        pwd 
 	cd ../frontend		
-	pwd        
 	npm run test:ci	
         cd ../server	
 	 npm run undoAllSeed	
 	 npm run migrate	
 	 npm run seed		 
+	 npm run coverage --silent
 	'''
 
     sh '''
@@ -159,7 +148,6 @@ sh '''
       curl -XPOST -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/USDAForestService/fs-open-forest-platform/statuses/$(git rev-parse HEAD) -d '{"state": "pending","context":"ci/jenkins: run-lint", "target_url": "https://jenkins.fedgovcloud.us/blue/organizations/jenkins/fs-open-forest-platform/activity","description": "Your tests are queued behind your running builds!"}'
       '''		
 		   sh '''
-	    pwd
 	    cd frontend
 	    npm run lint 
 	    cd ../server
@@ -263,10 +251,8 @@ sh '''
       '''
 
 	sh '''
-		pwd
 		cd server
 		./copy-frontend-assets.sh
-        	pwd
 		cd ../frontend/node_modules/protractor
 		npm i webdriver-manager@latest
 		cd ../..
