@@ -17,7 +17,7 @@ pipeline {
         GITHUB_PROJECT_NAME = "USDAForestService/fs-open-forest-platform"
         SONAR_PROJECT_NAME = "fs-openforest-platform"
         //MAILING_LIST = 'ikumarasamy@techtrend.us,matthew.reiss@usda.gov,abdul.qureshi@usda.gov,SM.FS.OpenFrstOps@usda.gov,michael.laney@usda.gov,Brian.Davidson2@usda.gov,Dylan.Mcafee@usda.gov,Rebekah.Hernandez@usda.gov,jonathan.lerner@usda.gov,shadat.mahmud@usda.gov,bdavidson@cynerge.com'
-	    MAILING_LIST = 'ikumarasamy@techtrend.us'
+        MAILING_LIST = 'ikumarasamy@techtrend.us'
 
 	CHECKOUT_STATUS = 'Pending'
         INSTALL_DEPENDENCIES_STATUS= 'Pending'
@@ -28,12 +28,6 @@ pipeline {
 	DEPLOY_STATUS = 'Pending'
 	RUN_SONARQUBE_STATUS = 'Pending'
 	AUTHOR = 'kilara77'
-	BASIC_AUTH_PASS=credentials('BASIC_AUTH_PASS')
-	BASIC_AUTH_USER=credentials('BASIC_AUTH_USER')
-	CF_USERNAME_DEV = credentials('CF_USERNAME_DEV')
-        CF_PASSWORD_DEV = credentials('CF_PASSWORD_DEV')
-        CF_USERNAME_STAGING = credentials('CF_USERNAME_STAGING')
-        CF_PASSWORD_STAGING = credentials('CF_PASSWORD_STAGING')
         JENKINS_URL="https://jenkins.fedgovcloud.us"
         SONARQUBE_URL="https://sca.fedgovcloud.us/dashboard?id=fs-openforest-platform"
     }
