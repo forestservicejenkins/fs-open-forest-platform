@@ -40,8 +40,7 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '50'))
     }  
 
- stages { 
-	  
+ stages { 	  
     stage('Checkout Code'){
        steps {              
                 script {			
